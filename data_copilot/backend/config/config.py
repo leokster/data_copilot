@@ -18,6 +18,7 @@ class Config(BaseSettings):
         "text/csv": "csv",
         "application/vnd.ms-excel": "xls",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
+        "application/pdf": "pdf",
     }
 
     if os.getenv("ENVIRONMENT") != "TEST":

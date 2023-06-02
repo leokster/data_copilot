@@ -334,23 +334,31 @@ async def post_artifacts_id_artifactid_versions(
             case "xls" | "xlsx":
                 data_frame = pd.read_excel(await file.read(), dtype={"dteday": str})
 
-        if data_frame.empty:
-            raise routing.HTTPException(
-                status_code=400, detail=f"Wrong '{file.file}'content"
-            )
+        if file_type in ("csv", "xls", "xlsx"):
+            if data_frame.empty:
+                raise routing.HTTPException(
+                    status_code=400, detail=f"Wrong '{file.file}'content"
+                )
+            schema = {col: str(data_frame[col].dtype) for col in data_frame.columns}
+            rows = data_frame.shape[0]
+
+        else:
+            schema = {}
+            rows = 0
+
+        file_config = {
+            "file_name": file.filename,
+            "file_type": file_type,
+            "file_schema": schema,
+            "rows": rows,
+        }
 
     except Exception as e:
         logging.error(e)
         raise routing.HTTPException(
             status_code=500, detail=f"Loading '{file.content_type}' failed"
         )
-    schema = {col: str(data_frame[col].dtype) for col in data_frame.columns}
-    file_config = {
-        "file_name": file.filename,
-        "file_type": file_type,
-        "file_schema": schema,
-        "rows": data_frame.shape[0],
-    }
+
     file.file.seek(0)
     with CreateArtifactVersionCM(artifact.id, db) as cm:
         cm.write(file.filename, file.file)
