@@ -17,6 +17,7 @@ import enum
 class BACKENDS(enum.Enum):
     SQL = "sql"
     LANGCHAIN = "langchain"
+    PDF = "pdf"
 
 
 STANDARD_BACKEND = BACKENDS.SQL
